@@ -48,6 +48,7 @@ hooks = {
             local playerName = GetPlayerName(payload.inventoryId)
             local playerIdentifier = GetPlayerIdentifiers(payload.inventoryId)[1]
             local playerCoords = GetEntityCoords(GetPlayerPed(payload.inventoryId))
+            if not playerIdentifier then return end
             sendWebhook('shop', {
                 {
                     title = 'Shop',
