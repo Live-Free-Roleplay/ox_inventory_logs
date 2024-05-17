@@ -7,7 +7,7 @@ webhooks = {
     ['glovebox'] = 'https://discord.com/api/webhooks/1240815296630099978/DdgZTDi8_k8zsWdBs0JVpOBTa89VVT3o4iZUihiZU0DJmOqO5g4gp5wVOQkqe-IufPGi',
     ['storage'] = 'https://discord.com/api/webhooks/1240815332982128681/C8NELOOPQm5jwjJJCGJsaTdE6mnclozxhtaRWymq3MNsBYx6IiRv-FHK6Sb99OoHWJvI',
     ['bag'] = 'https://discord.com/api/webhooks/1240821759612289125/4Vhpfy5xVWHa0ba1Ifrw0vr2CQl4jb8IrhSpU1jBo_RlnhRTl8MQYtmNrClR4iHhpn3H',
-    ['shop'] = 'https://discord.com/api/webhooks/1240818126161969172/lzhUN3GjVEIn4WXgjxVaRmjM88cqGPR9JLxTRmOH8EEWl7LYsCs-dfidGzOAEppk9zkY',
+    ['shop'] = 'https://discord.com/api/webhooks/1240826888109162547/B47iFRg4wgezmlK8gX7SQUqH5WfavzNCSjEBzlssdjpHdZRYeG6t5iIxR1hSsQBM5Kgz',
 }
 
 --[[ 
@@ -42,27 +42,23 @@ hooks = {
     ['shop'] = {
         from = 'shop',
         to = 'player',
-        options = {
-            typeFilter = {
-                shop = true,
-            },
-        },
+        type = 'createItem',
+        options = {},
         callback = function(payload)
-            local playerName = GetPlayerName(payload.source)
-            local playerIdentifier = GetPlayerIdentifiers(payload.source)[1]
-            local playerCoords = GetEntityCoords(GetPlayerPed(payload.source))
+            local playerName = GetPlayerName(payload.inventoryId)
+            local playerIdentifier = GetPlayerIdentifiers(payload.inventoryId)[1]
+            local playerCoords = GetEntityCoords(GetPlayerPed(payload.inventoryId))
             sendWebhook('shop', {
                 {
                     title = 'Shop',
-                    description = ('Player **%s** (%s, %s) **took** item **%s** x%s (metadata: %s) **from shop %s** at coordinates %s.')
+                    description = ('Player **%s** (%s, %s) **took** item **%s** x%s (metadata: %s) **from shop** at coordinates %s.')
                         :format(
                             playerName,
                             playerIdentifier,
-                            payload.source,
-                            payload.fromSlot.name,
-                            payload.fromSlot.count,
-                            json.encode(payload.fromSlot.metadata),
-                            payload.fromInventory,
+                            payload.inventoryId,
+                            payload.item.name,
+                            payload.count,
+                            json.encode(payload.metadata),
                             ('%s, %s, %s'):format(playerCoords.x, playerCoords.y, playerCoords.z)
                         ),
                     color = 0x00ff00
@@ -73,6 +69,7 @@ hooks = {
     ['bag_to'] = {
         from = 'player',
         to = 'stash',
+        type = 'swapItems',
         options = {
             typeFilter = {
                 player = true,
@@ -83,7 +80,7 @@ hooks = {
         },
         callback = function(payload)
             local playerName = GetPlayerName(payload.source)
-            local playerIdentifier = GetPlayerIdentifiers(payload.source)[1]
+            local playerIdentifier = GetPlayerIdentifiers(payload.source)[2]
             local playerCoords = GetEntityCoords(GetPlayerPed(payload.source))
             sendWebhook('bag', {
                 {
@@ -107,17 +104,18 @@ hooks = {
     ['bag_from'] = {
         from = 'stash',
         to = 'player',
+        type = 'swapItems',
         options = {
             typeFilter = {
                 stash = true,
             },
             inventoryFilter = {
                 '^bag[%w]+',
-            },
+		    }
         },
         callback = function(payload)
             local playerName = GetPlayerName(payload.source)
-            local playerIdentifier = GetPlayerIdentifiers(payload.source)[1]
+            local playerIdentifier = GetPlayerIdentifiers(payload.source)[2]
             local playerCoords = GetEntityCoords(GetPlayerPed(payload.source))
             sendWebhook('bag', {
                 {
@@ -141,18 +139,19 @@ hooks = {
     ['storage_to'] = {
         from = 'player',
         to = 'stash',
+        type = 'swapItems',
         options = {
             typeFilter = {
                 player = true,
             },
             inventoryFilter = {
-                '^locker[%w]+',
-                '^STORAGE[%w]+',
-            },
+				'^STORAGE_UNIT_[%w]+',
+				'^locker[%w]+',
+		    }
         },
         callback = function(payload)
             local playerName = GetPlayerName(payload.source)
-            local playerIdentifier = GetPlayerIdentifiers(payload.source)[1]
+            local playerIdentifier = GetPlayerIdentifiers(payload.source)[2]
             local playerCoords = GetEntityCoords(GetPlayerPed(payload.source))
             sendWebhook('storage', {
                 {
@@ -176,18 +175,19 @@ hooks = {
     ['storage_from'] = {
         from = 'stash',
         to = 'player',
+        type = 'swapItems',
         options = {
             typeFilter = {
                 stash = true,
             },
             inventoryFilter = {
-                '^locker[%w]+',
-                '^STORAGE[%w]+',
+                '^STORAGE_UNIT_[%w]+',
+				'^locker[%w]+',
             },
         },
         callback = function(payload)
             local playerName = GetPlayerName(payload.source)
-            local playerIdentifier = GetPlayerIdentifiers(payload.source)[1]
+            local playerIdentifier = GetPlayerIdentifiers(payload.source)[2]
             local playerCoords = GetEntityCoords(GetPlayerPed(payload.source))
             sendWebhook('storage', {
                 {
@@ -210,7 +210,8 @@ hooks = {
     },
     ['trunk_to'] = {
         from = 'player',
-        to = 'stash',
+        to = 'trunk',
+        type = 'swapItems',
         options = {
             typeFilter = {
                 player = true,
@@ -221,7 +222,7 @@ hooks = {
         },
         callback = function(payload)
             local playerName = GetPlayerName(payload.source)
-            local playerIdentifier = GetPlayerIdentifiers(payload.source)[1]
+            local playerIdentifier = GetPlayerIdentifiers(payload.source)[2]
             local playerCoords = GetEntityCoords(GetPlayerPed(payload.source))
             sendWebhook('trunk', {
                 {
@@ -243,11 +244,12 @@ hooks = {
         end
     },
     ['trunk_from'] = {
-        from = 'stash',
+        from = 'trunk',
         to = 'player',
+        type = 'swapItems',
         options = {
             typeFilter = {
-                stash = true,
+                trunk = true,
             },
             inventoryFilter = {
                 '^trunk[%w]+',
@@ -255,7 +257,7 @@ hooks = {
         },
         callback = function(payload)
             local playerName = GetPlayerName(payload.source)
-            local playerIdentifier = GetPlayerIdentifiers(payload.source)[1]
+            local playerIdentifier = GetPlayerIdentifiers(payload.source)[2]
             local playerCoords = GetEntityCoords(GetPlayerPed(payload.source))
             sendWebhook('trunk', {
                 {
@@ -278,7 +280,8 @@ hooks = {
     },
     ['glovebox_to'] = {
         from = 'player',
-        to = 'stash',
+        to = 'glovebox',
+        type = 'swapItems',
         options = {
             typeFilter = {
                 player = true,
@@ -289,7 +292,7 @@ hooks = {
         },
         callback = function(payload)
             local playerName = GetPlayerName(payload.source)
-            local playerIdentifier = GetPlayerIdentifiers(payload.source)[1]
+            local playerIdentifier = GetPlayerIdentifiers(payload.source)[2]
             local playerCoords = GetEntityCoords(GetPlayerPed(payload.source))
             sendWebhook('glovebox', {
                 {
@@ -311,11 +314,12 @@ hooks = {
         end
     },
     ['glovebox_from'] = {
-        from = 'stash',
+        from = 'glovebox',
         to = 'player',
+        type = 'swapItems',
         options = {
             typeFilter = {
-                stash = true,
+                glovebox = true,
             },
             inventoryFilter = {
                 '^glove[%w]+',
@@ -323,7 +327,7 @@ hooks = {
         },
         callback = function(payload)
             local playerName = GetPlayerName(payload.source)
-            local playerIdentifier = GetPlayerIdentifiers(payload.source)[1]
+            local playerIdentifier = GetPlayerIdentifiers(payload.source)[2]
             local playerCoords = GetEntityCoords(GetPlayerPed(payload.source))
             sendWebhook('glovebox', {
                 {
@@ -347,6 +351,7 @@ hooks = {
     ['drop'] = {
         from = 'player',
         to = 'drop',
+        type = 'swapItems',
         options = {
             typeFilter = {
                 player = true,
@@ -354,7 +359,7 @@ hooks = {
         },
         callback = function(payload)
             local playerName = GetPlayerName(payload.source)
-            local playerIdentifier = GetPlayerIdentifiers(payload.source)[1]
+            local playerIdentifier = GetPlayerIdentifiers(payload.source)[2]
             local playerCoords = GetEntityCoords(GetPlayerPed(payload.source))
             sendWebhook('drop', {
                 {
@@ -377,6 +382,7 @@ hooks = {
     ['pickup'] = {
         from = 'drop',
         to = 'player',
+        type = 'swapItems',
         options = {
             typeFilter = {
                 drop = true,
@@ -384,7 +390,7 @@ hooks = {
         },
         callback = function(payload)
             local playerName = GetPlayerName(payload.source)
-            local playerIdentifier = GetPlayerIdentifiers(payload.source)[1]
+            local playerIdentifier = GetPlayerIdentifiers(payload.source)[2]
             local playerCoords = GetEntityCoords(GetPlayerPed(payload.source))
             sendWebhook('pickup', {
                 {
@@ -407,6 +413,7 @@ hooks = {
     ['give'] = {
         from = 'player',
         to = 'player',
+        type = 'swapItems',
         options = {
             typeFilter = {
                 player = true,
@@ -415,7 +422,7 @@ hooks = {
         callback = function(payload)
             if payload.fromInventory == payload.toInventory then return end
             local playerName = GetPlayerName(payload.source)
-            local playerIdentifier = GetPlayerIdentifiers(payload.source)[1]
+            local playerIdentifier = GetPlayerIdentifiers(payload.source)[2]
             local playerCoords = GetEntityCoords(GetPlayerPed(payload.source))
             local targetSource = payload.toInventory
             local targetName = GetPlayerName(targetSource)
@@ -446,6 +453,7 @@ hooks = {
     ['stash_pick'] = {
         from = 'player',
         to = 'stash',
+        type = 'swapItems',
         options = {
             typeFilter = {
                 player = true,
@@ -453,7 +461,7 @@ hooks = {
         },
         callback = function(payload)
             local playerName = GetPlayerName(payload.source)
-            local playerIdentifier = GetPlayerIdentifiers(payload.source)[1]
+            local playerIdentifier = GetPlayerIdentifiers(payload.source)[2]
             local playerCoords = GetEntityCoords(GetPlayerPed(payload.source))
             sendWebhook('stash', {
                 {
@@ -477,6 +485,7 @@ hooks = {
     ['stash'] = {
         from = 'stash',
         to = 'player',
+        type = 'swapItems',
         options = {
             typeFilter = {
                 stash = true,
@@ -484,7 +493,7 @@ hooks = {
         },
         callback = function(payload)
             local playerName = GetPlayerName(payload.source)
-            local playerIdentifier = GetPlayerIdentifiers(payload.source)[1]
+            local playerIdentifier = GetPlayerIdentifiers(payload.source)[2]
             local playerCoords = GetEntityCoords(GetPlayerPed(payload.source))
             sendWebhook('stash', {
                 {

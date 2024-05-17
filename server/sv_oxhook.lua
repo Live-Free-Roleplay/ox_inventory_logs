@@ -1,9 +1,10 @@
 types = {}
 
-function addTypeHook(name, from, to, options, callback)
+function addTypeHook(name, from, to, typea, options, callback)
     types[name] = {
         from = from,
         to = to,
+        type = typea,
         options = options,
         callback = callback
     }
@@ -17,13 +18,16 @@ AddEventHandler('onResourceStart', function(resource)
     end
     for name, data in pairs(types) do
         exports.ox_inventory:registerHook(
-            'swapItems',
+            data.type,
             function(payload)
-                if payload.fromType == data.from and payload.toType == data.to then
-                    --print('^3[logs] ^0' .. name .. ' type hook triggered.')
+                if data.type ~= "createItem" and payload.fromType == data.from and payload.toType == data.to then
+                    print('^3[logs] ^0' .. name .. ' type hook triggered.')
+                    data.callback(payload)
+                elseif data.type == "createItem" then
+                    print('^3[logs] ^0' .. name .. ' type hook triggered.')
                     data.callback(payload)
                 end
-                --print(json.encode(payload, { indent = true }))
+                print(json.encode(payload, { indent = true }))
             end,
             data.options
         )
