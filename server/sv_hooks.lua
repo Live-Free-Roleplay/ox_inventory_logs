@@ -1,5 +1,5 @@
 for name, data in pairs(hooks) do
-    addTypeHook(name, data.from, data.to, data.callback)
+    addTypeHook(name, data.from, data.to, data.options, data.callback)
 end
 
 function sendWebhook(webhook, data)
