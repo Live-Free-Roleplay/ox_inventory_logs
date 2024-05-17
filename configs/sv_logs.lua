@@ -42,24 +42,24 @@ hooks = {
     ['shop'] = {
         from = 'shop',
         to = 'player',
-        type = 'createItem',
+        type = 'buyItem',
         options = {},
         callback = function(payload)
-            local playerName = GetPlayerName(payload.inventoryId)
-            local playerIdentifier = GetPlayerIdentifiers(payload.inventoryId)[1]
-            local playerCoords = GetEntityCoords(GetPlayerPed(payload.inventoryId))
-            if not playerIdentifier then return end
+            local playerName = GetPlayerName(payload.toInventory)
+            local playerIdentifier = GetPlayerIdentifiers(payload.toInventory)[1]
+            local playerCoords = GetEntityCoords(GetPlayerPed(payload.toInventory))
             sendWebhook('shop', {
                 {
                     title = 'Shop',
-                    description = ('Player **%s** (%s, %s) **took** item **%s** x%s (metadata: %s) **from shop** at coordinates %s.')
+                    description = ('Player **%s** (%s, %s) **took** item **%s** x%s (metadata: %s) from shop **%s** at coordinates %s.')
                         :format(
                             playerName,
                             playerIdentifier,
-                            payload.inventoryId,
-                            payload.item.name,
+                            payload.toInventory,
+                            payload.itemName,
                             payload.count,
                             json.encode(payload.metadata),
+                            payload.shopType,
                             ('%s, %s, %s'):format(playerCoords.x, playerCoords.y, playerCoords.z)
                         ),
                     color = 0x00ff00

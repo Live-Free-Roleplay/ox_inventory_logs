@@ -20,14 +20,14 @@ AddEventHandler('onResourceStart', function(resource)
         exports.ox_inventory:registerHook(
             data.type,
             function(payload)
-                if data.type ~= "createItem" and payload.fromType == data.from and payload.toType == data.to then
-                    print('^3[logs] ^0' .. name .. ' type hook triggered.')
+                --print(json.encode(payload, { indent = true }))
+                if data.type ~= "buyItem" and payload.fromType == data.from and payload.toType == data.to then
+                    --print('^3[logs] ^0' .. name .. ' type hook triggered.')
                     data.callback(payload)
-                elseif data.type == "createItem" then
-                    print('^3[logs] ^0' .. name .. ' type hook triggered.')
+                elseif data.type == "buyItem" then
+                    --print('^3[logs] ^0' .. name .. ' type hook triggered.')
                     data.callback(payload)
                 end
-                print(json.encode(payload, { indent = true }))
             end,
             data.options
         )
