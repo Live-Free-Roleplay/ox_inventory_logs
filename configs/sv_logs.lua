@@ -51,7 +51,7 @@ hooks = {
             sendWebhook('shop', {
                 {
                     title = 'Shop',
-                    description = ('Player **%s** (%s, %s) **took** item **%s** x%s (metadata: %s) from shop **%s** at coordinates %s.')
+                    description = ('Player **%s** (%s, %s) **took** item **%s** x%s (metadata: %s) from shop **%s** for %s at coordinates %s.')
                         :format(
                             playerName,
                             playerIdentifier,
@@ -60,6 +60,7 @@ hooks = {
                             payload.count,
                             json.encode(payload.metadata),
                             payload.shopType,
+                            payload.price,
                             ('%s, %s, %s'):format(playerCoords.x, playerCoords.y, playerCoords.z)
                         ),
                     color = 0x00ff00
